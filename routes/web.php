@@ -24,7 +24,15 @@ Route::get('/login', [UserController::class, 'login'])->name('login');
 Route::post('/login', [UserController::class, 'loginUser'])->name('login_user');
 Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard')->middleware(['authenticate', 'role:superadmin|user']);
+Route::middleware(['authenticate'])->group(function () {
+    Route::get('/produk', [UserController::class, 'produk'])->name('produk')->middleware('role:user|superadmin');
+    Route::get('/manajemenproduk', [UserController::class, 'manajemenproduk'])->name('manajemenproduk')->middleware('role:user|superadmin');
+    Route::get('/manajemen-user', [UserController::class, 'manajemenuser'])->name('manajemenuser')->middleware('role:superadmin');
+    Route::get('/tambah-user', [UserController::class, 'tambahuser'])->name('tambahuser')->middleware('role:superadmin');
+    Route::post('/tambah-user', [UserController::class, 'Newuser'])->name('Newuser.user')->middleware('role:superadmin');
+    Route::delete('/delete-user/{id}', [UserController::class, 'deleteUser'])->name('delete_user')->middleware('role:superadmin');
+    Route::get('/edit-user/{id}', [UserController::class, 'editUser'])->name('edit_user')->middleware('role:superadmin');
+    Route::post('/update-user/{id}', [UserController::class, 'updateUser'])->name('update_user')->middleware('role:superadmin');
+});
 
-Route::get('/login/google', [UserController::class, 'loginGoogle'])->name('login_google');
-Route::get('/login/google/callback', [UserController::class, 'loginGoogleCallback'])->name('callback_google');
+

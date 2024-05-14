@@ -3,8 +3,9 @@
 
 @section('content')
 <div class="row justify-content-center mt-5">
-    <div class="col-md-4 border p-4 rounded">
-        <h1 class="h3 mb-3 fw-normal text-center">Halaman Register User</h1>
+    <h1 class="h3 mb-3 fw-normal text-center fw-bold ">Register</h1>
+    <div class="col-md-4 border p-4 rounded bg-white w-50 ">
+       
 
         <!-- error message -->
         @if (session('error'))
@@ -20,7 +21,7 @@
             @csrf
 
             <div class="form-group mb-3">
-                <label for="name">Nama Lengkap</label>
+                <label for="name">Nama</label>
                 <input type="text" name="name" id="name" class="form-control" placeholder="Masukan Nama Lengkap Kamu" required>
                 @error('name')
                     <div class="text-danger mt-2">{{ $message }}</div>
@@ -83,6 +84,16 @@
                 <label for="address">Alamat</label>
                 <textarea name="address" id="address" class="form-control" placeholder="Masukan Alamat Kamu" required></textarea>
                 @error('address')
+                    <div class="text-danger mt-2">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group mb-3 w-100 ">
+                <label for="address">Role</label>
+                <select name="role" id="role" class="form-select">
+                    <option value="user">User</option>
+                    <option value="superadmin">Superadmin</option>
+                </select>
+                @error('role')
                     <div class="text-danger mt-2">{{ $message }}</div>
                 @enderror
             </div>
