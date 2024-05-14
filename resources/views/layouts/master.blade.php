@@ -22,7 +22,7 @@
                     <ul class="navbar-nav ms-auto fw-bold">
                         @auth
                             <li class="nav-item">
-                                <a class="nav-link" href="">Manage Product</a>
+                                <a class="nav-link" href="{{route('manajemenproduk')}}">Manage Product</a>
                             </li>
                             @if(Auth::user()->hasRole('superadmin'))
                                 <li class="nav-item">

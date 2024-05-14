@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Product;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -49,10 +50,10 @@ class UserController extends Controller
         if ($user) {
             $user->assignRole($request->role);
             
-            Auth::login($user); // Automatically log in the user
+            Auth::login($user); 
 
             // Redirect to the product page
-            return redirect()->route('produk')->with('success', 'User created successfully');
+            return redirect()->route('getproduk')->with('success', 'User created successfully');
         } else {
             return redirect()->route('register')
                 ->with('error', 'Failed to create user');
@@ -81,11 +82,18 @@ class UserController extends Controller
             $request->session()->regenerate();
 
             // Redirect to the product page
-            return redirect()->route('produk');
+            return redirect()->route('getproduk');
         } else {
             return redirect()->route('login')
                 ->with('error', 'Login failed, email or password is incorrect');
         }
+    }
+
+    public function manajemenuser() {
+        $user = Auth::user();
+        $users = User::all();
+        return view('manajemenUser', compact('users'));
+        
     }
 
     public function tambahuser() {
@@ -202,32 +210,95 @@ class UserController extends Controller
 
 
     
-    public function produk() {
+   
+
+    public function manajemenproduk() {
         $user = Auth::user();
-        return view('produk');
+        $data = Product::all();
+        return view('manajemenproduk')->with('products', $data);
+    }
+// tambah produk
+    public function tambahproduk() {
+        return view('handle_request');
     }
 
-    public function manajemenuser() {
-        $user = Auth::user();
-        $users = User::all();
-        return view('manajemenUser', compact('users'));
-        
+    public function newproduk(Request $request) {
+
+        $messages = [
+            'image.required' => 'Kolom gambar produk wajib diisi.',
+            'nama.required' => 'Kolom nama produk wajib diisi.',
+            'berat.required' => 'Kolom berat produk wajib diisi.',
+            'harga.required' => 'Kolom harga produk wajib diisi.',
+            'stok.required' => 'Kolom stok produk wajib diisi.',
+            'kondisi.required' => 'Kolom kondisi produk wajib diisi.',
+            'kondisi.not_in' => 'Pilih kondisi barang yang valid.',
+            'deskripsi.required' => 'Kolom deskripsi produk wajib diisi.',
+        ];
+       
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpg,png|max:2048', 
+            'nama' => 'required',
+            'berat' => 'required|numeric',
+            'harga' => 'required|numeric',
+            'stok' => 'required|numeric',
+            'kondisi' => 'required|not_in:0',
+            'deskripsi' => 'required|max:2000 ',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return redirect()->route('tambahproduk')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        if ($request->hasFile('image')) {
+            $imageName = time() . '_' . $request->file('image')->getClientOriginalName();
+            $request->file('image')->storeAs('public/storage/images/'.$imageName);
+        }
+    
+        Product::create([
+            'image' => 'storage/storage/images/'. $imageName,
+            'name' => $request->nama,
+            'weight' => $request->berat,
+            'price' => $request->harga,
+            'condition' => $request->kondisi,
+            'stock' => $request->stok,
+            'description' => $request->deskripsi,
+            
+        ]);
+
+        return redirect()->route('manajemenproduk');
+       
     }
+
+    public function produk() {
+        $user = Auth::user();
+        $data = Product::all();
+        return view('produk')->with('products', $data);
+    }
+
+    public function editproduk($id) {
+        $produk = Product::find($id);
+        return view('updateproduk', compact('produk'));
+    }
+
+    public function updateproduk(Request $request, $id) {
+        $produk = Product::find($id);
+    }
+
+    public function deleteproduk($id) {
+        $produk = Product::find($id);
+        $produk->delete();
+        return redirect()->route('manajemenproduk');
+    }
+
+
+
+    
 
     public function dashboard()
     {
         $user = Auth::user();
-
-        // get user role
-        // dd($user->roles[0]->name);
-        
-        // change role
-        // $user->roles()->detach();
-        // $user->assignRole('superadmin');
-
-        // if (!$user) {
-        //     return redirect()->route('login');
-        // }
 
         return view('dashboard', compact('user'));
     }

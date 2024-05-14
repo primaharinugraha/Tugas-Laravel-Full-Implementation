@@ -18,7 +18,7 @@
                 <ul class="navbar-nav ms-auto fw-bold">
                     @auth
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('produk') }}">Manage Product</a>
+                            <a class="nav-link" href="{{ route('getproduk') }}">Manage Product</a>
                         </li>
                         @if(Auth::user()->hasRole('superadmin'))
                             <li class="nav-item">
@@ -111,7 +111,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 offset-md-3 mt-2">
-                        <a href=""class="btn btn-warning mx-auto text-dark">Kembali</a>
+                        <a href="{{route('manajemenuser')}}"class="btn btn-warning mx-auto text-dark">Kembali</a>
                         <button class="btn btn-dark mx-auto" type="submit">Submit</button>
                     </div>
                     

@@ -25,8 +25,14 @@ Route::post('/login', [UserController::class, 'loginUser'])->name('login_user');
 Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
 Route::middleware(['authenticate'])->group(function () {
-    Route::get('/produk', [UserController::class, 'produk'])->name('produk')->middleware('role:user|superadmin');
+    Route::get('/produk', [UserController::class, 'produk'])->name('getproduk')->middleware('role:user|superadmin');
     Route::get('/manajemenproduk', [UserController::class, 'manajemenproduk'])->name('manajemenproduk')->middleware('role:user|superadmin');
+    Route::get('/tambahproduk', [UserController::class, 'tambahproduk'])->name('tambahproduk')->middleware('role:user|superadmin');
+    Route::post('/tambah-produk', [UserController::class, 'newproduk'])->name('newprodukk')->middleware('role:user|superadmin');
+    Route::delete('/delete-produk/{id}', [UserController::class, 'deleteproduk'])->name('delete_produk')->middleware('role:user|superadmin');
+    Route::get('/edit-produk/{id}', [UserController::class, 'editproduk'])->name('editproduk')->middleware('role:user|superadmin');
+    Route::post('/update-produk/{id}', [UserController::class, 'updateproduk'])->name('update_produk')->middleware('role:user|superadmin');
+    
     Route::get('/manajemen-user', [UserController::class, 'manajemenuser'])->name('manajemenuser')->middleware('role:superadmin');
     Route::get('/tambah-user', [UserController::class, 'tambahuser'])->name('tambahuser')->middleware('role:superadmin');
     Route::post('/tambah-user', [UserController::class, 'Newuser'])->name('Newuser.user')->middleware('role:superadmin');
