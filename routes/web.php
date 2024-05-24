@@ -1,44 +1,70 @@
 <?php
 
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TransactionController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
 
 Route::get('/', function () {
-    //return view('welcome');
+    return view('layouts.landingpage');
+})->name('landingpage');
 
-    //$resEncrypt = encrypt('Password123', true);
-    //dd($resEncrypt);
-    // eyJpdiI6IkR6WGhrV205bTVnMGFyakd2ZEhEenc9PSIsInZhbHVlIjoieU9VYys3YWdGeEdML0NBRWxXN0ZTZUZ4cDFYVUxxdGJDUHpOeDFoSmVzaz0iLCJtYWMiOiJlOWVhMzY2MTgyNmViYTk2MTBiYWQ3Zjc1NDExMDZmMWU2MjM5ZTVjYjM5MzA2MWUwZDIyNmNiMmNkZjA4ODE3IiwidGFnIjoiIn0=
-    //$resDecrypt = decrypt('eyJpdiI6IkR6WGhrV205bTVnMGFyakd2ZEhEenc9PSIsInZhbHVlIjoieU9VYys3YWdGeEdML0NBRWxXN0ZTZUZ4cDFYVUxxdGJDUHpOeDFoSmVzaz0iLCJtYWMiOiJlOWVhMzY2MTgyNmViYTk2MTBiYWQ3Zjc1NDExMDZmMWU2MjM5ZTVjYjM5MzA2MWUwZDIyNmNiMmNkZjA4ODE3IiwidGFnIjoiIn0=', true);
-    //dd($resDecrypt);
+// Products
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
-    $pass = 'Password123';
-    $hashPass = Hash::make('Password1234');
-    dd(Hash::check($pass, $hashPass));
+
+
+
+// Auth
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/register', [AuthController::class, 'store'])->name('register.store');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
+
+// Google OAuth
+Route::get('/login/google', [AuthController::class, 'loginGoogle'])->name('google.login');
+Route::get('/login/google/callback', [AuthController::class, 'loginGoogleCallback'])->name('google.Callback');
+// Dashboard
+Route::prefix('dashboard')->middleware('authentication')->group(function () {
+Route::get('/profil-user/{id}', [AuthController::class, 'profileuser'])->name('profile.users');
+Route::get('/transactions/{id}', [TransactionController::class, 'transactionDetail'])->name('transaction.detail');
+
+
+    // Products
+    Route::prefix('products')->middleware('role:superadmin|user')->group(function () {
+        Route::get('/', [DashboardController::class, 'products'])->name('dashboard.products');
+        // Route::get('/products/datatable', [DashboardController::class, 'indexdatatable'])->name('index.datatable');
+        // Route::post('/products/datatable', [ProductController::class, 'datatable'])->name('datatable');
+        Route::get('/{id}/detail', [ProductController::class, 'productDetail'])->name('products.detail');
+        Route::get('/add', [DashboardController::class, 'addProduct'])->name('dashboard.products.add');
+        Route::post('/store', [DashboardController::class, 'storeProduct'])->name('dashboard.products.store');
+        Route::get('/edit/{id}', [DashboardController::class, 'editProduct'])->name('dashboard.products.edit');
+        Route::put('/update/{id}', [DashboardController::class, 'updateProduct'])->name('dashboard.products.update');
+        Route::post('/delete/{id}', [DashboardController::class, 'deleteProduct'])->name('dashboard.products.delete');
+        Route::get('/export', [DashboardController::class, 'exportProduct'])->name('dashboard.products.export');
+    });
+
+    // Users
+    Route::prefix('users')->middleware('role:superadmin')->group(function () {
+        Route::get('/', [DashboardController::class, 'users'])->name('dashboard.users');
+        Route::get('/add', [DashboardController::class, 'addUser'])->name('dashboard.users.add');
+        Route::post('/store', [DashboardController::class, 'storeUser'])->name('dashboard.users.store');
+        Route::get('/edit/{id}', [DashboardController::class, 'editUser'])->name('dashboard.users.edit');
+        Route::put('/update/{id}', [DashboardController::class, 'updateUser'])->name('dashboard.users.update');
+        Route::post('/delete/{id}', [DashboardController::class, 'deleteUser'])->name('dashboard.users.delete');
+    });
+
 });
-
-Route::get('/register', [UserController::class, 'register'])->name('register');
-Route::post('/register-user', [UserController::class, 'registerUser'])->name('register_user');
-Route::get('/login', [UserController::class, 'login'])->name('login');
-Route::post('/login', [UserController::class, 'loginUser'])->name('login_user');
-Route::get('/logout', [UserController::class, 'logout'])->name('logout');
-
-Route::middleware(['authenticate'])->group(function () {
-    Route::get('/produk', [UserController::class, 'produk'])->name('getproduk')->middleware('role:user|superadmin');
-    Route::get('/manajemenproduk', [UserController::class, 'manajemenproduk'])->name('manajemenproduk')->middleware('role:user|superadmin');
-    Route::get('/tambahproduk', [UserController::class, 'tambahproduk'])->name('tambahproduk')->middleware('role:user|superadmin');
-    Route::post('/tambah-produk', [UserController::class, 'newproduk'])->name('newprodukk')->middleware('role:user|superadmin');
-    Route::delete('/delete-produk/{id}', [UserController::class, 'deleteproduk'])->name('delete_produk')->middleware('role:user|superadmin');
-    Route::get('/edit-produk/{id}', [UserController::class, 'editproduk'])->name('editproduk')->middleware('role:user|superadmin');
-    Route::post('/update-produk/{id}', [UserController::class, 'updateproduk'])->name('update_produk')->middleware('role:user|superadmin');
-    
-    Route::get('/manajemen-user', [UserController::class, 'manajemenuser'])->name('manajemenuser')->middleware('role:superadmin');
-    Route::get('/tambah-user', [UserController::class, 'tambahuser'])->name('tambahuser')->middleware('role:superadmin');
-    Route::post('/tambah-user', [UserController::class, 'Newuser'])->name('Newuser.user')->middleware('role:superadmin');
-    Route::delete('/delete-user/{id}', [UserController::class, 'deleteUser'])->name('delete_user')->middleware('role:superadmin');
-    Route::get('/edit-user/{id}', [UserController::class, 'editUser'])->name('edit_user')->middleware('role:superadmin');
-    Route::post('/update-user/{id}', [UserController::class, 'updateUser'])->name('update_user')->middleware('role:superadmin');
-});
-
-
